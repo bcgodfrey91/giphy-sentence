@@ -4,18 +4,25 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      inputText: '',
+      inputTextArray: [],
     }
   }
 
   updateInput(e) {
-    this.setState({ inputText: e.target.value })
+    this.setState({ inputTextArray: e.target.value.split(' ') })
+  }
+
+  renderInput() {
+    return this.state.inputTextArray.map((i) => <li>{i}</li>)
   }
 
   render() {
     return (
       <div className="App">
         <input onChange={(e) => this.updateInput(e)}/>
+        <ul>
+          {this.renderInput()}
+        </ul>
       </div>
     );
   }
