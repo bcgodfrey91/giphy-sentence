@@ -52,11 +52,13 @@ class App extends Component {
         <li
         key={index}
         >
-          <img
-            className='giphy'
-            src={giphy.images.original.url}
-            alt='Giphy from user search'
-          />
+          <a href={giphy.url}>
+            <img
+              className='giphy'
+              src={giphy.images.original.url}
+              alt='Giphy from user search'
+            />
+          </a>
         </li>
       )
     })
