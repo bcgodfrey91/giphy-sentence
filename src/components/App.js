@@ -1,37 +1,73 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 
 class App extends Component {
   constructor() {
-    super();
+    super()
     this.state = {
       inputTextArray: [],
-      giphyArray: []
+      giphyArray: [],
+      previousQuery: '',
+      searchQuery: ''
     }
   }
 
-  updateInput(e) {
-    this.setState({ inputTextArray: e.target.value.split(' ') })
+  generateApiUrl(text) {
+    return `http://api.giphy.com/v1/gifs/search?q=${text}&api_key=dc6zaTOxFJmzC`
   }
 
-  searchGiphyApi() {
-    let arrayOfGifs = []
-    this.state.inputTextArray.forEach((i) => {
-    return fetch(`http://api.giphy.com/v1/gifs/search?q=${i}&api_key=dc6zaTOxFJmzC`)
-    .then((res) => res.json())
-    .then((response) => this.setState({ giphyArray: this.state.giphyArray.concat(response.data[Math.floor(Math.random() * 25)].images.fixed_height.url) }))
+  promisifyApiCalls() {
+    return this.state.inputTextArray
+      .map(text => fetch(this.generateApiUrl(text)))
+  }
+
+  handleInput = (e) => {
+    const inputTextArray = e.target.value.split(' ')
+    const searchQuery = inputTextArray.join(' ')
+    this.setState({ inputTextArray, searchQuery })
+  }
+
+  handleApiSearch = () => {
+    const previousQuery = this.state.searchQuery
+
+    this.setState({ giphyArray: [], previousQuery }, () => {
+      this.setState({ searchQuery: '' })
     })
-    this.setState({ inputTextArray: [], giphyArray: [] })
+
+    Promise.all(this.promisifyApiCalls()).then((gifResponse) => {
+      gifResponse.forEach((gif) => {
+        gif.json()
+          .then((response) => {
+            const giphy = response.data[Math.floor(Math.random() * 25)]
+            const giphyArray = [...this.state.giphyArray, giphy]
+            this.setState({ giphyArray })
+          });
+      })
+    })
   }
 
   renderGiphys() {
-    return this.state.giphyArray.map((giphy) => <li key={giphy}><img src={giphy} /></li>)
+    return this.state.giphyArray.map((giphy, index) => {
+      return (
+        <li key={index}>
+          <img src={giphy.images.fixed_height.url} />
+        </li>
+      )
+    })
   }
 
   render() {
     return (
       <div className="App">
-        <input onChange={(e) => this.updateInput(e)}/>
-        <button onClick={() => this.searchGiphyApi()}>Create Giphy Sentence</button>
+        <input
+          value={this.state.searchQuery}
+          onChange={this.handleInput}
+        />
+        <button
+          onClick={this.handleApiSearch}
+        >
+          Create Giphy Sentence
+        </button>
+        <h1>{this.state.previousQuery}</h1>
         <ul>
           {this.renderGiphys()}
         </ul>
