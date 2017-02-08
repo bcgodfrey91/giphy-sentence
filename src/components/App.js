@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import '../styles/App.css';
 
 class App extends Component {
   constructor() {
@@ -17,7 +18,7 @@ class App extends Component {
 
   promisifyApiCalls() {
     return this.state.inputTextArray
-      .map(text => fetch(this.generateApiUrl(text)))
+      .map(text => fetch(this.generateApiUrl(text.toLowerCase())))
   }
 
   handleInput = (e) => {
@@ -40,7 +41,7 @@ class App extends Component {
             const giphy = response.data[Math.floor(Math.random() * 25)]
             const giphyArray = [...this.state.giphyArray, giphy]
             this.setState({ giphyArray })
-          });
+          })
       })
     })
   }
@@ -48,8 +49,14 @@ class App extends Component {
   renderGiphys() {
     return this.state.giphyArray.map((giphy, index) => {
       return (
-        <li key={index}>
-          <img src={giphy.images.fixed_height.url} />
+        <li
+        key={index}
+        >
+          <img
+            className='giphy'
+            src={giphy.images.original.url}
+            alt='Giphy from user search'
+          />
         </li>
       )
     })
@@ -57,23 +64,34 @@ class App extends Component {
 
   render() {
     return (
-      <div className="App">
+      <div
+        className='App'
+      >
         <input
+          className='user-input'
+          placeholder='Create a Giphy Sentence'
           value={this.state.searchQuery}
           onChange={this.handleInput}
         />
         <button
+          className='create-sentence-button'
           onClick={this.handleApiSearch}
         >
-          Create Giphy Sentence
+          Create
         </button>
-        <h1>{this.state.previousQuery}</h1>
-        <ul>
+        <h1
+          className='previous-query'
+        >
+          {this.state.previousQuery}
+        </h1>
+        <ul
+          className='giphy-list'
+        >
           {this.renderGiphys()}
         </ul>
       </div>
-    );
+    )
   }
 }
 
-export default App;
+export default App
