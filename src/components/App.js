@@ -13,7 +13,7 @@ class App extends Component {
   }
 
   generateApiUrl(text) {
-    return `http://api.giphy.com/v1/gifs/search?q=${text}&api_key=dc6zaTOxFJmzC`
+    return `https://api.giphy.com/v1/gifs/search?q=${text}&api_key=dc6zaTOxFJmzC`
   }
 
   promisifyApiCalls() {
