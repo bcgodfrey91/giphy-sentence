@@ -12,6 +12,12 @@ class App extends Component {
     }
   }
 
+  handleInput = (e) => {
+    const inputTextArray = e.target.value.split(' ')
+    const searchQuery = inputTextArray.join(' ')
+    this.setState({ inputTextArray, searchQuery })
+  }
+
   generateApiUrl(text) {
     return `https://api.giphy.com/v1/gifs/search?q=${text}&api_key=dc6zaTOxFJmzC`
   }
@@ -21,40 +27,44 @@ class App extends Component {
       .map(text => fetch(this.generateApiUrl(text.toLowerCase())))
   }
 
-  handleInput = (e) => {
-    const inputTextArray = e.target.value.split(' ')
-    const searchQuery = inputTextArray.join(' ')
-    this.setState({ inputTextArray, searchQuery })
+  handlePromises(promises) {
+    promises.forEach((promise) => {
+      const giphy = promise.data[Math.floor(Math.random() * promise.data.length)]
+      const giphyArray = [...this.state.giphyArray, giphy]
+      this.setState({ giphyArray })
+    })
   }
 
   handleApiSearch = () => {
     const previousQuery = this.state.searchQuery
 
     this.setState({ giphyArray: [], previousQuery }, () => {
-      this.setState({ searchQuery: '' })
+      this.setState({ searchQuery: '', inputTextArray: [] })
     })
 
-    Promise.all(this.promisifyApiCalls()).then((gifResponse) => {
-      gifResponse.forEach((gif) => {
-        gif.json()
-          .then((response) => {
-            const giphy = response.data[Math.floor(Math.random() * 25)]
-            const giphyArray = [...this.state.giphyArray, giphy]
-            this.setState({ giphyArray })
-          })
+    Promise.all(this.promisifyApiCalls())
+      .then((gifResponses) => gifResponses.map((gif) => gif.json()))
+      .then((gifPromises) => Promise.all(gifPromises))
+      .then((resolvedGifPromises) => this.handlePromises(resolvedGifPromises))
+      .catch((error) => {
+        alert('One of your queries was invalid. Please try again.')
+        this.setState({ giphyArray: [] })
       })
-    })
   }
 
   renderGiphys() {
     return this.state.giphyArray.map((giphy, index) => {
       return (
         <li
-        key={index}
+          className='giphy-item'
+          key={index}
         >
-          <a href={giphy.url}>
+          <a
+            href={giphy.url}
+            className='giphy-link'
+          >
             <img
-              className='giphy'
+              className='giphy-image'
               src={giphy.images.original.url}
               alt='Giphy from user search'
             />
